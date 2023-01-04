@@ -24,12 +24,14 @@ func main() {
 	}
 	log.Print("connected to database")
 
-	log.Printf("starting server on %s", port)
-	http.ListenAndServe(port, http.HandlerFunc(pictureHandler))
+	router := http.NewServeMux()
+	router.Handle("/upload", http.MaxBytesHandler(http.HandlerFunc(uploadHandler), 1024*1024*1024))
 
+	log.Printf("starting server on %s", port)
+	http.ListenAndServe(port, router)
 }
 
-func pictureHandler(w http.ResponseWriter, r *http.Request) {
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	content, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
