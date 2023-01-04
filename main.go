@@ -40,6 +40,24 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	fingerprint := fmt.Sprintf("%x", sha1.Sum(content))
 
+	rows, err := dbconn.Query(context.Background(), "SELECT * from pictures where fingerprint=$1", fingerprint)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	count := 0
+	for rows.Next() {
+		count = count + 1 //count++
+	}
+	if err = rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if count > 0 {
+		http.Error(w, "content already exists", http.StatusConflict)
+		return
+	}
+
 	_, err = dbconn.Exec(context.Background(), "INSERT INTO pictures(id, fingerprint) VALUES ($1,$2)", uuid.New(), fingerprint)
 	if err != nil {
 		log.Fatal(err)
