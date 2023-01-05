@@ -1,4 +1,4 @@
-# Pictures Webapp
+# Webapp
 
 Simple web application to upload and list content.
 
@@ -22,13 +22,13 @@ go test ./...
 Start the database
 
 ```shell
-docker run -p 5432:5432 -e POSTGRES_PASSWORD=anything -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=pictures -v $PWD/init.sql:/docker-entrypoint-initdb.d/init.sql postgres
+docker run -p 5432:5432 -e POSTGRES_PASSWORD=anything -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=webapp -v $PWD/init.sql:/docker-entrypoint-initdb.d/init.sql postgres
 ```
 
 Start the server
 
 ```shell
-DB_URL=postgresql://pictures@localhost/pictures go run main.go
+DB_URL=postgresql://webapp@localhost/webapp go run main.go
 ```
 
 Upload some content
@@ -41,6 +41,12 @@ List your content
 
 ```shell
 curl localhost:8080/pictures
+```
+
+Explore your database content
+
+```shell
+psql --username webapp --host localhost webapp
 ```
 
 ## Deploy
