@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -50,7 +51,7 @@ func picturesListingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var pictures []Picture
+	pictures := make([]Picture, 0)
 	for rows.Next() {
 		var pic Picture
 		if err = rows.Scan(&pic.Fingerprint, &pic.CreatedAt); err != nil {
@@ -60,9 +61,19 @@ func picturesListingHandler(w http.ResponseWriter, r *http.Request) {
 		pictures = append(pictures, pic)
 	}
 
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", " ")
+	if err = enc.Encode(pictures); err != nil { //encode my pictures in w
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	/* each row turned into object picture, we append into a "slice"
 	for i, picture := range pictures {
 		fmt.Fprintf(w, "%d. fingerprint = %s\n", i+1, picture.Fingerprint)
 	}
+
+	*/
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
